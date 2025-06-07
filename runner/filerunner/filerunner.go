@@ -213,8 +213,7 @@ func (r *fileRunner) setApp() error {
 
 	if !r.cfg.DisablePageReuse {
 		opts = append(opts,
-			scrapemateapp.WithPageReuseLimit(2),
-			scrapemateapp.WithPageReuseLimit(200),
+			scrapemateapp.WithPageReuseLimit(20), // Changed to 20 for initial stability testing
 		)
 	}
 

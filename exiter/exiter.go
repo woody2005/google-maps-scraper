@@ -2,6 +2,7 @@ package exiter
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -67,19 +68,25 @@ func (e *exiter) IncrPlacesCompleted(val int) {
 }
 
 func (e *exiter) Run(ctx context.Context) {
+	fmt.Printf("[Exiter] Run started\n")
+	defer fmt.Printf("[Exiter] Run finished\n")
+
 	ticker := time.NewTicker(time.Second * 5)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
+			fmt.Printf("[Exiter] Context done, exiting Run loop.\n")
 			return
 		case <-ticker.C:
+			fmt.Printf("[Exiter] Tick: Checking if done.\n")
 			if e.isDone() {
+				fmt.Printf("[Exiter] All tasks complete. Calling cancelFunc().\n")
 				e.cancelFunc()
-
 				return
 			}
+			fmt.Printf("[Exiter] Tasks not yet complete.\n")
 		}
 	}
 }
@@ -87,6 +94,7 @@ func (e *exiter) Run(ctx context.Context) {
 func (e *exiter) isDone() bool {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+	fmt.Printf("[Exiter] State: seedCompleted=%d, seedCount=%d, placesFound=%d, placesCompleted=%d\n", e.seedCompleted, e.seedCount, e.placesFound, e.placesCompleted)
 
 	if e.seedCompleted != e.seedCount {
 		return false
