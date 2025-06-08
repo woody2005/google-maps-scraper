@@ -244,14 +244,16 @@ func (j *GmapJob) BrowserActions(ctx context.Context, page playwright.Page) scra
 
 	scrollSelector := `div[role='feed']`
 
+	// Set a more aggressive timeout for the scrolling part.
 	const scrollOperationTimeout = 15000 // 15 seconds
-	originalTimeout := page.DefaultTimeout()
-	log.Info(fmt.Sprintf("[GmapJob %s] Setting page default timeout to %dms for scrolling operation", j.ID, scrollOperationTimeout))
+	// SetDefaultTimeout affects Evaluate, which is used in scroll()
 	page.SetDefaultTimeout(float64(scrollOperationTimeout))
+	log.Info(fmt.Sprintf("[GmapJob %s] Set page default timeout to %dms for scrolling operation", j.ID, scrollOperationTimeout))
 
 	defer func() {
-		page.SetDefaultTimeout(originalTimeout)
-		log.Info(fmt.Sprintf("[GmapJob %s] Restored page default timeout to %vms", j.ID, originalTimeout))
+		// Restore to Playwright's own default timeout (30 seconds)
+		page.SetDefaultTimeout(30000)
+		log.Info(fmt.Sprintf("[GmapJob %s] Restored page default timeout to 30000ms (Playwright default)", j.ID))
 	}()
 
 	log.Info(fmt.Sprintf("[GmapJob %s] Starting scroll operation with maxDepth: %d", j.ID, j.MaxDepth))
